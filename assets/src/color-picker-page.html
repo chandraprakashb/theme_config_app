@@ -1,0 +1,504 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script>
+
+    function ManageColorPicker(){
+        this.defaultColor = localStorage.getItem(localStorage.getItem('edit'));
+        this.currentInput = $(".color-input")[0];
+        this.inputType    = "hex-input"; 
+
+        this.mainSetup = () =>{
+
+            this.setColorPicker(this.defaultColor);
+
+            $(".color-input").on('click',(event)=>{
+                this.currentInput = event.target;
+                // $(event.target).focus()
+            })
+
+            $(".hex-input").on('blur',()=>{
+                this.setColorThroughHex();
+                $(".alphabet").addClass('disabled')
+                $(".alphabet").removeClass('enabled')
+
+            });
+            $(".hex-input").on('focus',()=>{
+                $(".alphabet").addClass('enabled')
+                $(".alphabet").removeClass('disabled')
+            })
+            
+            $(".rgb-input").on('change',this.rgbInputValidate.bind(this))
+            $(".rgb-input").on('input',this.rgbInputValidate.bind(this))
+            $(".rgb-input").on('blur',this.rgbInputValidate.bind(this))
+            $(".percentage-input").on('blur', this.percentageInput.bind(this))
+
+            $(".color-input").on('focus',(event)=>{
+                // $(".color-input").blur();
+                // $(event.target).focus();
+            })
+
+            $(document).click((event)=>{
+                if(event.target.classList){
+                    if(event.target.classList.contains('num-input-wrapper')){
+                        this.currentInput.focus()
+                    }
+                }
+            })
+
+            $("#reset-btn").click(()=>{
+                $(".hex-input").val(this.defaultColor)
+                $(".hex-input")[0].dispatchEvent(new Event('blur'))
+            })
+            $("#confirm-btn").click(()=>{
+                localStorage.setItem(localStorage.getItem('edit'),$(".hex-input").val())
+                $(".menu-item")[0].click();
+            })
+
+            $(".num-input-wrapper").on('click',(event)=>{
+
+                console.log(event.target);
+                
+                var keyStroke = event.target.dataset.keystroke;
+
+                if(!keyStroke) {
+                    keyStroke = event.target.closest(".num-input-wrapper").dataset.keystroke;
+                }
+                
+                if(keyStroke === 'ok' || keyStroke === 'delete'){
+                    switch(keyStroke){
+                        case 'ok':
+                            $(document).click()
+                            break;
+                        case 'delete':
+                            console.log(this.currentInput);
+                            if(this.currentInput){
+                                this.currentInput.value = '';
+                            }
+                            break;
+                    }
+                }else{
+                    if(keyStroke){
+                        this.currentInput.value = this.currentInput.value.toString() + keyStroke.toString();
+                    }
+                }
+
+
+            })  
+        }
+
+        this.setColorPicker = (setColor=  this.defaultColor)  => {
+
+            if(setColor === null || setColor=== undefined) setColor = this.defaultColor
+            
+            this.putColorInInputs(setColor)
+            $(".color-picker-wrapper").empty()
+            $('.pcr-app').remove()
+            $(".color-picker-wrapper").html(`<div id="color-picker"></div>`)
+            const colorPickerElement = document.getElementById('color-picker');
+            this.pickr = '';
+            this.pickr = Pickr.create({
+                el: colorPickerElement,
+                theme: 'nano',
+                default: setColor,
+                // swatches: ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#000000'],
+                components: {
+                preview: true,
+                opacity: true,
+                hue: true,
+                interaction: {
+                        hex: false,
+                        rgba: false,
+                        input: false,
+                        clear: false,
+                        save: false
+                    }
+                },
+                closeOnScroll: false,
+            });
+
+            $(".color-picker-wrapper").empty()
+            $(".color-picker-wrapper").append($(".pcr-app"))
+
+            this.pickr.show();
+            this.pickr.on('change',color => this.putColorInInputs(color.toHEXA().toString()) );
+        }
+
+        // Validate RGB INPUT
+        this.rgbInputValidate = (event) =>{
+            if(event.target.dataset.type === 'rgb-input'){
+
+                const rgbInputMaxValue = 255;
+                if (event.target.value > rgbInputMaxValue) {
+                    event.target.value = rgbInputMaxValue;
+                }
+
+                if(event.target.value.length === 3){
+                    var nextInput = $(event.target).parent().next().find('input')
+                    if(nextInput.length !== 0){
+                        nextInput.focus()
+                    }
+                }
+
+                if(event.target.value === '' && event.type ==='blur'){
+                    var nextInput = $(event.target).parent().next().find('input')
+                    if(nextInput.length !== 0){
+                        nextInput.focus()
+                        event.target.value = 0
+                    }
+                }
+
+                if(event.type ==='change') this.setColorThroughRgba()
+                
+            }
+
+        }
+        this.percentageInput = (event) =>{
+            var input = event.target.value;
+            const hasPercentageSign = input.includes('%');
+
+            // if(event.target.value.length === 0) event.target.value = "100%";
+
+            if(event.target.value.length === 3 && !hasPercentageSign){
+                if(parseInt(event.target.value) > 100){
+                    console.log(parseInt(event.target.value));
+                    event.target.value = "100%";
+                }
+            }
+
+            if(event.target.value.length === 4){
+                event.target.value = "100%";
+            }
+
+            if (hasPercentageSign) {
+                if (input.endsWith('%')) {
+                    event.target.value = input;
+                } else {
+                    event.target.value = "100%";
+                }
+            }else event.target.value = input + "%";
+
+            this.setColorThroughRgba();
+
+            // if(event.type === 'blur') managePercentage();
+            
+        };
+
+        this.putColorInInputs = (color) =>{
+            var rgb = hexToRgba(color);
+            $(".hex-input").val(color);
+            $(".rgb-input")[0].value = rgb[0];
+            $(".rgb-input")[1].value = rgb[1];
+            $(".rgb-input")[2].value = rgb[2];           
+            $(".percentage-input").val($(".percentage-input").val());
+        }
+
+        //SETTING COLORS THROUGH HEX
+        this.setColorThroughHex = () =>{
+            this.setColorPicker($('.hex-input').val())
+        } 
+
+        // SETTING COLOR THROUGH RGBA
+        this.setColorThroughRgba= () =>{
+            this.setColorPicker(rgbaToHex(
+                `rgba(${$(".R").val()}, ${$(".G").val()}, ${$(".B").val()}, ${(parseInt($(".A").val().slice(0, -1)))/100})`
+            ))
+        }
+
+
+        this.mainSetup();
+    }
+
+    var managecolorpicker = new ManageColorPicker();
+
+</script>
+
+<style>
+  .load-color-picker  .wrapper{
+        padding: 15px;
+        border: 1.351px solid #8E9FBC;
+        /* height: 300px; */
+        height: auto;
+        margin-bottom: 10px;
+        /* margin-left: 20px;
+        margin-right: 20px; */
+    }
+
+ .load-color-picker   .input-pile-wrapper{
+        margin-top: 70px;
+    }
+
+.load-color-picker    .color-input{
+        font-size: 13px !important;
+    }
+
+    .load-color-picker .color-pile-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100% !important;
+    }
+
+    .load-color-picker   .column-wrapper{
+        display: flex;
+        flex-direction: row;
+        width: 100% !important;
+        gap: 5px;
+    }
+
+    .load-color-picker   .color-pile{
+        flex: 1;
+        min-width: 0; /* Prevent columns from overflowing if content is too wide */
+        gap: 5px;
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5.405px;
+        /* border: 1.351px solid #8E9FBC; */
+        /* padding: 1px; */
+        font-weight: 600;
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .load-color-picker .first-column {
+        flex: 0 0 26%;
+        color: #222222;
+        border: 1.351px solid #8E9FBC; 
+    }
+
+    .load-color-picker .red{
+        background-color: red;
+    }
+    .load-color-picker  .green{background-color: green;}
+    .load-color-picker  .blue{background-color: blue;}
+
+    .load-color-picker  .alpha{
+        background-image: url(./assets/img/transparent.png);
+        background-size: cover;
+        background-repeat: no-repeat;
+        color: #222222;
+    }
+
+   
+    .load-color-picker .first-input-column{
+        flex: 0 0 26%;
+    }
+
+    .load-color-picker .color-pile input{
+        width: 100%;
+        height: 27px;
+        border-radius: 5.405px;
+        border: 1.351px solid #8E9FBC;
+        background-color: #F2F7FF;
+    }
+
+    .load-color-picker   button{
+        padding: 7px 18px;
+        border-radius: 13px;
+        background: #E3E3E3;
+        color: #000;
+        font-family: Roboto;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        border: none;
+        outline: none;
+    }
+
+    .load-color-picker   .confirm-button{
+        background-color: #036016;
+        color: #E3E3E3;
+    }
+
+
+    .load-color-picker  .keyboard-wrapper-main{
+        margin-left: 20px;
+        margin-right: 20px;
+        background-color: #8E9FBC;
+    }
+
+    .load-color-picker   .num-input-wrapper{
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        font-size: 27px;
+        width: 100%;
+        height: 66px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: ease 1s;
+    }
+ 
+    .load-color-picker  .num-input-wrapper:hover{
+        background: #036016;
+    }
+
+    .load-color-picker .keyboard-wrapper .col-4 {
+    border: 1px solid #ecebeb;
+    color: #ecebeb;
+    padding: 0 !important;
+}
+
+.load-color-picker .action-btn  .icon{
+    font-size: 20px !important;
+    text-align: center;
+}
+
+.load-color-picker .action-btn .text{
+    font-size: 13px !important;
+    margin-bottom: -2px;
+    text-align: center;
+}
+
+.load-color-picker .ok-button{
+    background: #036016;
+}
+
+.load-color-picker .keyboard-wrapper{
+    background-color: #8E9FBC;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+input:focus {
+      outline: none;
+    }
+
+</style>
+
+<div class="row">
+    <div class="col-6">
+        <div class="wrapper">
+            <div class="color-picker-wrapper"></div>
+            <div class="input-pile-wrapper">
+                <div class="color-pile-wrapper">    
+                    <div class="column-wrapper">
+                        <div class="color-pile first-column">Hex</div>
+                        <div class="color-pile red">R</div>
+                        <div class="color-pile green">G</div>
+                        <div class="color-pile blue">B</div>
+                        <div class="color-pile alpha">A</div>
+                    </div>
+                </div>
+
+                <div class="color-pile-wrapper mt-1">    
+                    <div class="column-wrapper">
+                        <div class="color-pile first-input-column">
+                            <input type="text" class=" color-input hex-input" maxlength="8"  data-type="hex-input">
+                        </div>
+                        <div class="color-pile">
+                            <input type="number" class=" color-input rgb-input R" data-type="rgb-input">
+                        </div>
+                        <div class="color-pile">
+                            <input type="number" class=" color-input rgb-input G" data-type="rgb-input">
+                        </div>
+                        <div class="color-pile">
+                            <input type="number" class=" color-input rgb-input B" data-type="rgb-input">
+                        </div>
+                        <div class="color-pile">
+                            <input type="text" class=" color-input percentage-input A" data-type="percentage-input" value="100%" maxlength="4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="reset-button" id="reset-btn">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    Reset
+                </button>
+                &nbsp;&nbsp;&nbsp;
+                <button class="confirm-button" id="confirm-btn">
+                    <i class="fa-solid fa-check"></i>
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="keyboard-wrapper-main">
+            <div class="keyboard-wrapper">
+                <div class="row" style="background-color: #8E9FBC;">
+                    <div class="col-4">
+                        <div class="num-input-wrapper alphabet" data-keystroke="A">A</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper alphabet" data-keystroke="B">B</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper alphabet" data-keystroke="C">C</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper alphabet" data-keystroke="D">D</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper alphabet" data-keystroke="E">E</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper alphabet" data-keystroke="F">F</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="1">1</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="2">2</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="3">3</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="4">4</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="5">5</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="6">6</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="7">7</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="8">8</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="9">9</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="0">0</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper ok-button"  data-keystroke="ok">
+                            <div class="action-btn">
+                                <div class="icon"><i class="fa-regular fa-circle-check"></i></div>
+                                <div class="text">Ok</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="num-input-wrapper" data-keystroke="delete">
+                            <div class="action-btn">
+                                <div class="icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="18" viewBox="0 0 23 18" fill="none">
+                                        <path d="M10.5337 13.5673L13.7837 10.3173L17.0337 13.5673L18.351 12.25L15.101 8.99997L18.351 5.74997L17.0337 4.43269L13.7837 7.68269L10.5337 4.43269L9.21649 5.74997L12.4665 8.99997L9.21649 12.25L10.5337 13.5673ZM0.947266 8.99997L5.90399 1.98559C6.14917 1.63624 6.46207 1.3638 6.84267 1.16828C7.22328 0.97276 7.62993 0.875 8.06264 0.875H19.7934C20.4167 0.875 20.9492 1.09576 21.3907 1.53728C21.8322 1.97878 22.053 2.51123 22.053 3.13462V14.8653C22.053 15.4887 21.8322 16.0212 21.3907 16.4627C20.9492 16.9042 20.4167 17.1249 19.7934 17.1249H8.06264C7.62193 17.1249 7.21528 17.0232 6.84267 16.8196C6.47009 16.6161 6.15719 16.3397 5.90399 15.9903L0.947266 8.99997ZM3.24048 8.99997L7.46164 14.9374C7.52575 15.0256 7.61188 15.0997 7.72005 15.1598C7.82823 15.2199 7.94243 15.25 8.06264 15.25H19.7934C19.8895 15.25 19.9777 15.2099 20.0578 15.1298C20.1379 15.0496 20.178 14.9615 20.178 14.8653V3.13462C20.178 3.03846 20.1379 2.9503 20.0578 2.87016C19.9777 2.79003 19.8895 2.74997 19.7934 2.74997H8.06264C7.94243 2.74997 7.82823 2.78002 7.72005 2.84013C7.61188 2.90023 7.52575 2.97435 7.46164 3.0625L3.24048 8.99997Z" fill="white"/>
+                                    </svg>
+                                </div>
+                                <div class="text">Delete</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="keyboard-wrapper">
+                <table cellspacing="0" cellpadding="0"></table>
+            </div>
+        </div>
+    </div>
+</div>

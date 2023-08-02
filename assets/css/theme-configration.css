@@ -1,0 +1,142 @@
+
+.color-info-wrapper{
+    border-bottom: 1px solid rgb(212, 212, 212);
+    padding-bottom: 7px;
+    margin-top: 22px;
+}
+
+.pencile-icon-wrapper{
+    text-align: right;
+}
+
+.pencile-icon-wrapper svg{
+    width: 30px;
+    height: 30px;
+    margin-top: -9px;
+    cursor: pointer;
+}
+
+.color-text{
+    color: #000;
+    text-align: center;
+    font-feature-settings: 'clig' off, 'liga' off;
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px; /* 100% */
+    text-transform: capitalize;
+}
+
+
+.color-box{
+    padding: 0px 10px;
+    padding-bottom: 3px;
+    position: relative;
+    border: 1px solid var(--primary_color);
+    border-radius: 5px;
+    scale: 0.1 !important;
+    line-height: 0;
+}
+
+
+.color-box .text{
+    color: var(--primary_color);
+    font-family: Roboto;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 21.622px;
+}
+
+.color-code{
+    font-family: Roboto;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+}
+
+
+.color-code .red{
+    color: red;
+}
+
+
+.color-code .green{
+    color: green;
+}
+
+
+.color-code .blue{
+    color: blue;
+}
+
+.primary-icon-box{
+    background: var(--primary_color);
+    color: rgb(255, 255, 255);
+}
+
+.icon-text-box{
+    /* background: #26335b; */
+}
+.color-box.white{
+    /* background: var(--secondary_color); */
+    color: rgb(255, 255, 255);
+}
+
+.color-box.white svg{
+    fill: #ffffff !important;
+}
+
+.color-box.black{
+    color: black !important;
+    /* background-color: transparent !important; */
+}
+
+.color-box.black svg{
+    fill: black !important;
+}
+
+
+.color-toggeler{
+    font-size: 12px;
+    width: 170px;
+    height: 35px;
+    padding: 4px 5px;
+    border-radius: 100px;
+    border: 3px solid #26335b;
+    background: #8e9fbc;
+    box-shadow: 0px 6px 5px 0px rgba(0, 0, 0, 0.20) inset;
+    color: #FFFFFF;
+    float: right;
+}
+
+
+.toggle-button{
+    width: 65px ;
+    height: 22px;
+    cursor: pointer;
+    /* width: 90%; */
+    margin: auto;
+    /* padding: 10px 15px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 5px;
+}
+
+.current{
+    border-radius: 100px;
+    background: #26335b;
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.20);
+
+}
+
+.secondary-icon-box{
+    background-color: var(--secondary_color);
+    color: #fff;
+}
+
+.edit-color svg{
+  fill: #8e9fbc;
+}

@@ -1,0 +1,22 @@
+.heilight{
+    color: #8C1C13;
+    font-weight: 700;
+}
+.p{
+    color: #000;
+    text-align: center;
+    font-feature-settings: 'clig' off, 'liga' off;
+    font-family: Roboto;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 133.333% */
+}
+.reset{
+    padding: 8px 20px;
+    border-radius: 10px;
+    background: #8C1C13;
+    border: none;
+    outline: none;
+    color: #fff;
+}
